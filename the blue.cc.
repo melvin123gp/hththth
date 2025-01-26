@@ -443,8 +443,6 @@ GeneralSection:AddButton({
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/melvin123gp/1212121f/refs/heads/main/efefdf"))()()
     end
-end
-    end
 })
 
 GeneralSection:AddButton({
