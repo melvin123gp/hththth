@@ -453,8 +453,8 @@ GeneralSection:AddButton({
 })
 
 GeneralSection:AddButton({
-    Name = 'no lag',
+    Name = 'Fake lag',
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/LiverMods/Tests/main/File/Antilag.lua"))()
+	loadstring(game:HttpGet('https://github.com/Bac0nHck/Scripts/blob/main/FakeLag?raw=true'))()
     end
 })
