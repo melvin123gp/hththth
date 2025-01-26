@@ -453,7 +453,7 @@ GeneralSection:AddButton({
 
 local tween_s = game:GetService('TweenService')
 
-local tweeninfo = TweenInfo.new(64,Enum.EasingStyle.Linear)
+local tweeninfo = TweenInfo.new(68,Enum.EasingStyle.Linear)
 
 
 
