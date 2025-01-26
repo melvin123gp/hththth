@@ -451,3 +451,10 @@ GeneralSection:AddButton({
         loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))("Spider Script")
     end
 })
+
+GeneralSection:AddButton({
+    Name = 'no lag',
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/LiverMods/Tests/main/File/Antilag.lua"))()
+    end
+})
