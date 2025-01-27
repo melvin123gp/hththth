@@ -413,22 +413,493 @@ host.CameraMaxZoomDistance = math.huge
     end
 })
 
+local GeneralSection = GeneralTab:CreateSection({
+    Name = 'no lag',
+    Side = 'Right'  -- 'Left' or 'Right'
+})
+
 GeneralSection:AddButton({
-    Name = 'WalkSpeed',
+    Name = 'FPS boost',
     Callback = function()
-      local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Character = workspace:WaitForChild(Player.Name)
-local Humanoid = Character:FindFirstChild("Humanoid")
+        --[[
+MAX FPS BOOSTER  | TRULY DOGSHIT PS1 GRAPHICS
 
-repeat wait() until Humanoid
+-no textures
+-simple shadows
+-simple water
+-no particles, reflections, or post effects
+-simplified hitboxes
+-no rendering tiny parts (<5 studs)
+--faster dex
+-**no terrain at all** | replaced with a huge baseplate | press CTRL+BRACKETS to change the baseplate height
 
-local WalkSpeedValue = 23
+--]]
 
-local function ChangeWalkSpeed(Value)
-	Humanoid.WalkSpeed = Value
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+	wait(10)
 end
 
-ChangeWalkSpeed(WalkSpeedValue)
+local function check(inst)
+	local class = inst.ClassName
+	if class == "Decal" or class == "Texture" then 
+		inst.Texture = ""
+	elseif class == "SpecialMesh" then 
+		inst.TextureId = ""
+	elseif class == "ParticleEmitter" then
+		inst.Texture = ""
+		inst.Rate = 0
+	elseif inst:IsA("BasePart") then 
+		inst.Material = "SmoothPlastic"
+		inst.Reflectance = 0
+		inst.CastShadow = false
+		if class == "MeshPart" then 
+			inst.TextureID = ""
+			inst.CollisionFidelity = "Hull"
+		elseif class == "UnionOperation" then
+			inst.CollisionFidelity = "Hull"
+		end
+		if inst.Anchored and inst.Size.Magnitude < 5 then
+			inst.Transparency = 1
+			inst.CanCollide = false
+			--inst:Destroy()
+		end
+	end
+end
+
+local function removeDups(children)
+	if #children > 99 then
+		local myname = tostring(game:GetService("Players").LocalPlayer)
+		local fake = {Name = myname}
+		for i=1,#children do
+			local name1 = children[i].Name
+			if name1 ~= myname and name1 ~= "Terrain" then
+				local moved = false
+				for j=i+1,#children do
+					if children[j].Name == name1 then
+						moved = true
+						children[j].Parent = workspace.Terrain
+						children[j] = fake
+					end
+				end
+				if moved then 
+					children[i].Parent = workspace.Terrain
+				end
+			end
+		end
+	end
+end
+
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+UserSettings():GetService("UserGameSettings").SavedQualityLevel = Enum.SavedQualitySetting.QualityLevel1
+settings().Rendering.EagerBulkExecution = false
+settings().Network.IncomingReplicationLag = -1000
+
+workspace:WaitForChild("Terrain")
+workspace.Terrain.WaterReflectance = 0
+workspace.Terrain.WaterWaveSize = 0
+workspace.Terrain.WaterWaveSpeed = 0
+workspace.Terrain.WaterTransparency = 0
+
+game:GetService("Lighting").GlobalShadows = false
+
+workspace.Terrain:Clear()
+local plates = {}
+if not workspace:FindFirstChild("Baseplate") then
+    for x=-1,1,2 do
+        for z=-1,1,2 do
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(2048,5,2048)
+            part.CFrame = CFrame.new(1024*x,-5,1024*z)
+            part.Anchored=true
+            part.Material="SmoothPlastic"
+            part.Color = Color3.new(0.36,0.6,0.3)
+            part.Name = "Baseplate"
+            part.Parent= workspace
+			plates[#plates+1]= part
+        end
+    end
+end
+local UIS = game:GetService("UserInputService")
+UIS.InputBegan:Connect(function(input,gpe)
+    if gpe==false and UIS:IsKeyDown("LeftControl") then 
+        if input.KeyCode==Enum.KeyCode.RightBracket then 
+            for _,part in ipairs(plates) do
+                part.CFrame=part.CFrame+Vector3.new(0,2.5,0)
+            end
+        elseif input.KeyCode==Enum.KeyCode.LeftBracket then 
+            for _,part in ipairs(plates) do 
+                part.CFrame=part.CFrame-Vector3.new(0,2.5,0)
+            end
+        end
+    end
+end)
+wait(0.3)
+
+while true do
+	for _,v in ipairs(game:GetService("Lighting"):GetDescendants()) do
+		if v:IsA("PostEffect") then
+			v.Enabled = false
+		end
+	end
+	local des = workspace:GetDescendants()
+	for i=1,#des do
+		check(des[i])
+	end
+	wait(0.3)
+	--faster dex
+	removeDups(workspace:GetChildren())
+
+	wait(600)
+end
+    end
+})
+
+local GeneralSection = GeneralTab:CreateSection({
+    Name = 'others',
+    Side = 'Left'  -- 'Left' or 'Right'
+})
+
+GeneralSection:AddButton({
+    Name = 'Camlock',
+    Callback = function()
+        getgenv().AimPart = "HumanoidRootPart" -- For R15 Games: {UpperTorso, LowerTorso, HumanoidRootPart, Head} | For R6 Games: {Head, Torso, HumanoidRootPart}
+getgenv().AimlockKey = "q"
+getgenv().AimRadius = 30 
+getgenv().ThirdPerson = true 
+getgenv().FirstPerson = true
+getgenv().TeamCheck = false -- Check if Target is on your Team (True means it wont lock onto your teamates, false is vice versa) (Set it to false if there are no teams)
+getgenv().PredictMovement = true -- Predicts if they are moving in fast velocity (like jumping) so the aimbot will go a bit faster to match their speed 
+getgenv().PredictionVelocity = 8.8
+
+local Players, Uis, RService, SGui = game:GetService"Players", game:GetService"UserInputService", game:GetService"RunService", game:GetService"StarterGui";
+local Client, Mouse, Camera, CF, RNew, Vec3, Vec2 = Players.LocalPlayer, Players.LocalPlayer:GetMouse(), workspace.CurrentCamera, CFrame.new, Ray.new, Vector3.new, Vector2.new;
+local Aimlock, MousePressed, CanNotify = true, false, false;
+local AimlockTarget;
+getgenv().CiazwareUniversalAimbotLoaded = true
+
+getgenv().WorldToViewportPoint = function(P)
+    return Camera:WorldToViewportPoint(P)
+end
+
+getgenv().WorldToScreenPoint = function(P)
+    return Camera.WorldToScreenPoint(Camera, P)
+end
+
+getgenv().GetObscuringObjects = function(T)
+    if T and T:FindFirstChild(getgenv().AimPart) and Client and Client.Character:FindFirstChild("Head") then 
+        local RayPos = workspace:FindPartOnRay(RNew(
+            T[getgenv().AimPart].Position, Client.Character.Head.Position)
+        )
+        if RayPos then return RayPos:IsDescendantOf(T) end
+    end
+end
+
+getgenv().GetNearestTarget = function()
+    -- Credits to whoever made this, i didnt make it, and my own mouse2plr function kinda sucks
+    local players = {}
+    local PLAYER_HOLD  = {}
+    local DISTANCES = {}
+    for i, v in pairs(Players:GetPlayers()) do
+        if v ~= Client then
+            table.insert(players, v)
+        end
+    end
+    for i, v in pairs(players) do
+        if v.Character ~= nil then
+            local AIM = v.Character:FindFirstChild("Head")
+            if getgenv().TeamCheck == true and v.Team ~= Client.Team then
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            elseif getgenv().TeamCheck == false and v.Team == Client.Team then 
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            end
+        end
+    end
+    
+    if unpack(DISTANCES) == nil then
+        return nil
+    end
+    
+    local L_DISTANCE = math.floor(math.min(unpack(DISTANCES)))
+    if L_DISTANCE > getgenv().AimRadius then
+        return nil
+    end
+    
+    for i, v in pairs(PLAYER_HOLD) do
+        if v.diff == L_DISTANCE then
+            return v.plr
+        end
+    end
+    return nil
+end
+
+Mouse.KeyDown:Connect(function(a)
+    if a == AimlockKey and AimlockTarget == nil then
+        pcall(function()
+            if MousePressed ~= true then MousePressed = true end 
+            local Target;Target = GetNearestTarget()
+            if Target ~= nil then 
+                AimlockTarget = Target
+            end
+        end)
+    elseif a == AimlockKey and AimlockTarget ~= nil then
+        if AimlockTarget ~= nil then AimlockTarget = nil end
+        if MousePressed ~= false then 
+            MousePressed = false 
+        end
+    end
+end)
+--[[
+Mouse.KeyDown:Connect(function(a)
+    if a == AimlockToggleKey then
+        Aimlock = not Aimlock
+    end
+end)
+]]
+RService.RenderStepped:Connect(function()
+    if getgenv().ThirdPerson == true and getgenv().FirstPerson == true then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 or (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    elseif getgenv().ThirdPerson == false and getgenv().FirstPerson == true then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    end
+    if Aimlock == true and MousePressed == true then 
+        if AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(getgenv().AimPart) then 
+            if getgenv().FirstPerson == true then
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end
+            elseif getgenv().ThirdPerson == true then 
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end 
+            end
+        end
+    end
+end)
+getgenv().keytoclick = "q"
+tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = keytoclick
+tool.Activated:connect(function()
+    local vim = game:service("VirtualInputManager")
+vim:SendKeyEvent(true, keytoclick, false, game)
+end)
+tool.Parent = game.Players.LocalPlayer.Backpack
+wait(0.2)
+local AkaliNotif = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/Dynissimo/main/Scripts/AkaliNotif.lua"))();
+local Notify = AkaliNotif.Notify;
+Notify({
+Description = "maz#6798";
+Title = "wspguys";
+Duration = 10;
+});
+    end
+})
+
+GeneralSection:AddButton({
+    Name = 'ESP name with cham',
+    Callback = function()
+        local FillColor = Color3.fromRGB(175,25,255)
+local DepthMode = "AlwaysOnTop"
+local FillTransparency = 0
+local OutlineColor = Color3.fromRGB(255,255,255)
+local OutlineTransparency = 0
+
+local CoreGui = game:FindService("CoreGui")
+local Players = game:FindService("Players")
+local lp = Players.LocalPlayer
+local connections = {}
+
+local Storage = Instance.new("Folder")
+Storage.Parent = CoreGui
+Storage.Name = "Highlight_Storage"
+
+local function Highlight(plr)
+    local Highlight = Instance.new("Highlight")
+    Highlight.Name = plr.Name
+    Highlight.FillColor = FillColor
+    Highlight.DepthMode = DepthMode
+    Highlight.FillTransparency = FillTransparency
+    Highlight.OutlineColor = OutlineColor
+    Highlight.OutlineTransparency = 0
+    Highlight.Parent = Storage
+    
+    local plrchar = plr.Character
+    if plrchar then
+        if plr ~= game.Players.LocalPlayer then
+        Highlight.Adornee = plrchar
+    end
+end
+
+    connections[plr] = plr.CharacterAdded:Connect(function(char)
+        Highlight.Adornee = char
+    end)
+end
+
+Players.PlayerAdded:Connect(Highlight)
+for i,v in next, Players:GetPlayers() do
+    if v ~= game.Players.LocalPlayer then
+    Highlight(v)
+end
+end
+
+Players.PlayerRemoving:Connect(function(plr)
+    local plrname = plr.Name
+    if Storage[plrname] then
+        Storage[plrname]:Destroy()
+    end
+    if connections[plr] then
+        connections[plr]:Disconnect()
+    end
+end)
+
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+--//Toggle\\--
+getgenv().Toggle = true -- This toggles the esp, turning it to false will turn it off
+getgenv().TC = false -- This toggles team check, turning it on will turn on team check
+local PlayerName = "Name" -- You can decide if you want the Player's name to be a display name which is "DisplayName", or username which is "Name"
+ 
+--//Variables\\--
+local P = game:GetService("Players")
+local LP = P.LocalPlayer
+ 
+--//Debounce\\--
+local DB = false
+ 
+--//Loop\\--
+while task.wait() do
+	if not getgenv().Toggle then
+		break
+	end
+	if DB then 
+		return 
+	end
+	DB = true
+ 
+	pcall(function()
+		for i,v in pairs(P:GetChildren()) do
+			if v:IsA("Player") then
+				if v ~= LP then
+					if v.Character then
+ 
+						local pos = math.floor(((LP.Character:FindFirstChild("HumanoidRootPart")).Position - (v.Character:FindFirstChild("HumanoidRootPart")).Position).magnitude)
+						-- Credits to Infinite Yield for this part (pos) ^^^^^^
+ 
+						if v.Character:FindFirstChild("Totally NOT Esp") == nil and v.Character:FindFirstChild("Icon") == nil and getgenv().TC == false then
+ 
+							--//ESP-Text\\--
+							local Icon = Instance.new("BillboardGui", v.Character.HumanoidRootPart)
+							local ESPText = Instance.new("TextLabel")
+ 
+							Icon.Name = "Icon"
+							Icon.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+							Icon.Active = true
+							Icon.AlwaysOnTop = true
+							Icon.ExtentsOffset = Vector3.new(0, 1, 0)
+							Icon.LightInfluence = 1.000
+							Icon.Size = UDim2.new(0, 800, 0, 50)
+ 
+							ESPText.Name = "ESP Text"
+							ESPText.Parent = Icon
+							ESPText.BackgroundColor3 = v.TeamColor.Color
+							ESPText.BackgroundTransparency = 1.000
+							ESPText.Size = UDim2.new(0, 800, 0, 50)
+							ESPText.Font = Enum.Font.SciFi
+							ESPText.Text = v[PlayerName]
+							ESPText.TextColor3 = v.TeamColor.Color
+							ESPText.TextSize = 10
+							ESPText.TextWrapped = true
+						else
+							if v.TeamColor ~= LP.TeamColor and v.Character:FindFirstChild("Totally NOT Esp") == nil and v.Character:FindFirstChild("Icon") == nil and getgenv().TC == true then
+ 
+ 
+								--//ESP-Text\\--
+								local Icon = Instance.new("BillboardGui", v.Character.HumanoidRootPart)
+								local ESPText = Instance.new("TextLabel")
+ 
+								Icon.Name = "Icon"
+								Icon.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+								Icon.Active = true
+								Icon.AlwaysOnTop = true
+								Icon.ExtentsOffset = Vector3.new(0, 1, 0)
+								Icon.LightInfluence = 1.000
+								Icon.Size = UDim2.new(0, 800, 0, 50)
+ 
+								ESPText.Name = "ESP Text"
+								ESPText.Parent = Icon
+								ESPText.BackgroundColor3 = v.TeamColor.Color
+								ESPText.BackgroundTransparency = 1.000
+								ESPText.Size = UDim2.new(0, 800, 0, 50)
+								ESPText.Font = Enum.Font.SciFi
+								ESPText.Text = v[PlayerName]
+								ESPText.TextColor3 = v.TeamColor.Color
+								ESPText.TextSize = 10
+								ESPText.TextWrapped = true
+							else
+								if not v.Character:FindFirstChild("Totally NOT Esp").FillColor == v.TeamColor.Color and not v.Character:FindFirstChild("Icon").TextColor3 == v.TeamColor.Color then
+									v.Character:FindFirstChild("Totally NOT Esp").FillColor = v.TeamColor.Color
+									v.Character:FindFirstChild("Icon").TextColor3 = v.TeamColor.Color
+								else
+									if v.Character:FindFirstChild("Totally NOT Esp").Enabled == false and v.Character:FindFirstChild("Icon").Enabled == false then
+										v.Character:FindFirstChild("Totally NOT Esp").Enabled = true
+										v.Character:FindFirstChild("Icon").Enabled = true
+									else
+										if v.Character:FindFirstChild("Icon") then
+											v.Character:FindFirstChild("Icon")["ESP Text"].Text = v[PlayerName]
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
+ 
+	wait()
+ 
+	DB = false
+end
     end
 })
