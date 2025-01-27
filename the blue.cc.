@@ -432,29 +432,3 @@ end
 ChangeWalkSpeed(WalkSpeedValue)
     end
 })
-
-local GeneralSection = GeneralTab:CreateSection({
-    Name = 'Trolling and more',
-    Side = 'Right'  -- 'Left' or 'Right'
-})
-
-GeneralSection:AddButton({
-    Name = 'fling all OP',
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/melvin123gp/1212121f/refs/heads/main/efefdf"))()()
-    end
-})
-
-GeneralSection:AddButton({
-    Name = 'Jerk off tool',
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))("Spider Script")
-    end
-})
-
-GeneralSection:AddButton({
-    Name = 'Fake lag',
-    Callback = function()
-	loadstring(game:HttpGet('https://github.com/Bac0nHck/Scripts/blob/main/FakeLag?raw=true'))()
-    end
-})
