@@ -1297,5 +1297,4 @@ GeneralSection:AddToggle({
             end
         end
     end
-    end
 })
