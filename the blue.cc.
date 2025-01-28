@@ -1153,3 +1153,149 @@ movingpart.Transparency = movetransparenc
 end)
     end
 })
+
+GeneralSection:AddToggle({
+    Name = 'ATM status',
+    Value = false,          -- Default state
+    Flag = 'feature_toggle', -- Unique identifier
+    Locked = false,         -- Prevent user changes
+    Callback = function(state)
+        local player = game.Players.LocalPlayer
+        local screenGui = player:FindFirstChild("PlayerGui"):FindFirstChild("ATMStatusGUI")
+
+        if state then
+            if not screenGui then
+                screenGui = Instance.new("ScreenGui")
+                screenGui.Name = "ATMStatusGUI"
+                screenGui.Parent = player:WaitForChild("PlayerGui")
+
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(0, 300, 0, 400)
+                frame.Position = UDim2.new(1, -320, 0.5, -200)
+                frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                frame.BackgroundTransparency = 0.2
+                frame.BorderSizePixel = 0
+                frame.Parent = screenGui
+
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(0, 10)
+                corner.Parent = frame
+
+                local shadow = Instance.new("ImageLabel")
+                shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+                shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
+                shadow.Size = UDim2.new(1, 40, 1, 40)
+                shadow.BackgroundTransparency = 1
+                shadow.Image = "rbxassetid://1316045217"  
+                shadow.ImageTransparency = 0.7
+                shadow.ZIndex = -1
+                shadow.Parent = frame
+
+                local title = Instance.new("TextLabel")
+                title.Size = UDim2.new(1, 0, 0, 40)
+                title.BackgroundTransparency = 1
+                title.Text = "ATM Status"
+                title.TextColor3 = Color3.fromRGB(255, 255, 255)
+                title.TextScaled = true
+                title.Font = Enum.Font.GothamBold
+                title.TextStrokeTransparency = 0.75
+                title.Parent = frame
+
+                local titleGradient = Instance.new("UIGradient")
+                titleGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
+                }
+                titleGradient.Rotation = 90
+                titleGradient.Parent = title
+
+                local scrollingFrame = Instance.new("ScrollingFrame")
+                scrollingFrame.Size = UDim2.new(1, -10, 1, -50)
+                scrollingFrame.Position = UDim2.new(0, 5, 0, 45)
+                scrollingFrame.BackgroundTransparency = 1
+                scrollingFrame.ScrollBarThickness = 8
+                scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(120, 120, 120)
+                scrollingFrame.Parent = frame
+
+                local uiListLayout = Instance.new("UIListLayout")
+                uiListLayout.Parent = scrollingFrame
+                uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+                uiListLayout.Padding = UDim.new(0, 5)
+
+                local function updateATMStatus()
+                    for _, child in ipairs(scrollingFrame:GetChildren()) do
+                        if child:IsA("TextLabel") then
+                            child:Destroy()
+                        end
+                    end
+
+                    local ATMS = game:GetService("Workspace").Map:WaitForChild("ATMS")
+                    local labels = {}
+
+                    for i = 1, 15 do
+                        local atmName = "ATM: " .. i
+                        local atm = ATMS:FindFirstChild("ATM" .. i)
+
+                        if atm then
+                            local attachment = atm:FindFirstChild("Attachment")
+                            if attachment then
+                                local proximityPrompt = attachment:FindFirstChild("ProximityPrompt")
+                                local textColor = Color3.fromRGB(255, 0, 0) 
+                                if proximityPrompt and proximityPrompt.Enabled then
+                                    textColor = Color3.fromRGB(0, 255, 0)  
+                                end
+
+                                local textLabel = Instance.new("TextLabel")
+                                textLabel.Size = UDim2.new(1, -20, 0, 25)
+                                textLabel.BackgroundTransparency = 0.1
+                                textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                                textLabel.Text = atmName
+                                textLabel.TextColor3 = textColor 
+                                textLabel.TextScaled = true
+                                textLabel.Font = Enum.Font.Gotham
+                                textLabel.TextXAlignment = Enum.TextXAlignment.Left
+                                textLabel.TextYAlignment = Enum.TextYAlignment.Center
+                                textLabel.Parent = scrollingFrame
+
+                                local labelCorner = Instance.new("UICorner")
+                                labelCorner.CornerRadius = UDim.new(0, 6)
+                                labelCorner.Parent = textLabel
+
+                                local labelGradient = Instance.new("UIGradient")
+                                labelGradient.Color = ColorSequence.new{
+                                    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 60)),
+                                    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 80, 80))
+                                }
+                                labelGradient.Rotation = 90
+                                labelGradient.Parent = textLabel
+                                
+                                table.insert(labels, textLabel)
+                            end
+                        end
+                    end
+
+                    local contentHeight = #labels * 30  
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+                end
+
+                updateATMStatus()
+
+                local connection
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    if state then
+                        updateATMStatus()
+                    else
+                        if connection then connection:Disconnect() end
+                    end
+                end)
+            end
+        else
+            if screenGui then
+                screenGui:Destroy()
+            end
+        end
+    end
+    end
+})
